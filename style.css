@@ -1,0 +1,76 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 10px;
+  background-color: #fff;
+  color: #000;
+  transition: 0.3s;
+  width: 400px;
+}
+
+body.dark {
+  background-color: #121212;
+  color: #ffffff;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-group {
+  display: flex;
+  gap: 5px;
+  margin-top: 5px;
+}
+
+input {
+  flex: 1;
+  padding: 6px;
+  font-size: 16px;
+  background-color: #fff;
+  color: #000;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  transition: 0.3s;
+}
+
+body.dark input {
+  background-color: #1e1e1e;
+  color: #fff;
+  border: 1px solid #444;
+}
+
+.copy-btn {
+  padding: 5px 8px;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+  background-color: #eee;
+  border-radius: 4px;
+  transition: 0.3s;
+}
+
+body.dark .copy-btn {
+  background-color: #2a2a2a;
+  color: #fff;
+}
+#modeToggle {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: inherit;
+}
