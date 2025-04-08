@@ -5,8 +5,13 @@ body {
   background-color: #fff;
   color: #000;
   transition: 0.3s;
-  width: 400px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
 }
+
 
 body.dark {
   background-color: #121212;
