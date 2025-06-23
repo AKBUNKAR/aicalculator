@@ -1,96 +1,137 @@
-const entryPrice = document.getElementById('entryPrice');
-const slPoints = document.getElementById('slPoints');
-const targetPoints = document.getElementById('targetPoints');
-const quantity = document.getElementById('quantity');
-const slPrice = document.getElementById('slPrice');
-const slPercent = document.getElementById('slPercent');
-const targetPrice = document.getElementById('targetPrice');
-const targetPercent = document.getElementById('targetPercent');
-const capitalRequired = document.getElementById('capitalRequired');
-const slInRupees = document.getElementById('slInRupees');
-const targetInRupees = document.getElementById('targetInRupees');
-const modeToggle = document.getElementById('modeToggle');
+// Element references
+const entryPriceInput = document.getElementById("entryPrice");
+const slPointsInput = document.getElementById("slPoints");
+const targetPointsInput = document.getElementById("targetPoints");
+const tslPointsInput = document.getElementById("tslPoints");
+const tslTriggerPointsInput = document.getElementById("tslTriggerPoints");
+const strickInput = document.getElementById("strick");
 
+const slPriceOutput = document.getElementById("slPrice");
+const targetPriceOutput = document.getElementById("targetPrice");
+const tslPriceOutput = document.getElementById("tslPrice");
+const tslTriggerPriceOutput = document.getElementById("tslTriggerPrice");
+
+const toggleModeButton = document.getElementById("toggle-mode");
+const togglePointsButton = document.getElementById("toggle-points");
+const pointsSection = document.getElementById("points-section");
+const modeIcon = document.getElementById("mode-icon");
+const toggleIcon = document.getElementById("toggle-icon");
+
+// Calculate output fields
 function calculate() {
-  const entry = parseFloat(entryPrice.value);
-  const sl = parseFloat(slPoints.value);
-  const tg = parseFloat(targetPoints.value);
-  const qty = parseFloat(quantity.value);
+  const entry = parseFloat(entryPriceInput.value);
+  const sl = parseFloat(slPointsInput.value);
+  const target = parseFloat(targetPointsInput.value);
+  const tsl = parseFloat(tslPointsInput.value);
+  const tslTrigger = parseFloat(tslTriggerPointsInput.value);
 
-  if (!isNaN(entry) && !isNaN(sl) && !isNaN(tg) && !isNaN(qty)) {
-    const slP = entry - sl;
-    const tgP = entry + tg;
+  if (!isNaN(entry)) {
+    slPriceOutput.value = isNaN(sl) ? '' : (entry - sl).toFixed(2);
+    targetPriceOutput.value = isNaN(target) ? '' : (entry + target).toFixed(2);
+    tslPriceOutput.value = isNaN(tsl) ? '' : (entry + tsl).toFixed(2);
+    tslTriggerPriceOutput.value = isNaN(tslTrigger) ? '' : (entry + tslTrigger).toFixed(2);
+  }
 
-    slPrice.value = slP.toFixed(2);
-    slPercent.value = ((sl / entry) * 100).toFixed(2) + "%";
+  saveValues();
+}
 
-    targetPrice.value = tgP.toFixed(2);
-    targetPercent.value = ((tg / entry) * 100).toFixed(2) + "%";
+// Save values to storage
+function saveValues() {
+  chrome.storage.local.set({
+    entryPrice: entryPriceInput.value,
+    slPoints: slPointsInput.value,
+    targetPoints: targetPointsInput.value,
+    tslPoints: tslPointsInput.value,
+    tslTriggerPoints: tslTriggerPointsInput.value,
+    strick: strickInput.value
+  });
+}
 
-    capitalRequired.value = (entry * qty).toFixed(2);
-    slInRupees.value = (sl * qty).toFixed(2);
-    targetInRupees.value = (tg * qty).toFixed(2);
+// Load stored values
+function loadValues() {
+  chrome.storage.local.get([
+    "entryPrice", "slPoints", "targetPoints",
+    "tslPoints", "tslTriggerPoints", "strick"
+  ], (result) => {
+    if (result.entryPrice) entryPriceInput.value = result.entryPrice;
+    if (result.slPoints) slPointsInput.value = result.slPoints;
+    if (result.targetPoints) targetPointsInput.value = result.targetPoints;
+    if (result.tslPoints) tslPointsInput.value = result.tslPoints;
+    if (result.tslTriggerPoints) tslTriggerPointsInput.value = result.tslTriggerPoints;
+    if (result.strick) strickInput.value = result.strick;
 
-    localStorage.setItem('slPoints', sl);
-    localStorage.setItem('targetPoints', tg);
-    localStorage.setItem('quantity', qty);
+    calculate();
+  });
+
+  const isDark = localStorage.getItem("darkMode") === "true";
+  document.body.classList.toggle("dark-mode", isDark);
+  modeIcon.classList.toggle("fa-sun", isDark);
+  modeIcon.classList.toggle("fa-moon", !isDark);
+
+  const isPointsHidden = localStorage.getItem("pointsHidden") === "true";
+  pointsSection.classList.toggle("hidden", isPointsHidden);
+  toggleIcon.classList.toggle("fa-arrow-up", isPointsHidden);
+  toggleIcon.classList.toggle("fa-arrow-down", !isPointsHidden);
+}
+
+// Input events
+[
+  entryPriceInput,
+  slPointsInput,
+  targetPointsInput,
+  tslPointsInput,
+  tslTriggerPointsInput,
+  strickInput
+].forEach(input => input.addEventListener("input", calculate));
+
+// Dark mode toggle
+toggleModeButton.addEventListener("click", () => {
+  const isDarkMode = document.body.classList.toggle("dark-mode");
+  localStorage.setItem("darkMode", isDarkMode);
+  modeIcon.classList.toggle("fa-sun", isDarkMode);
+  modeIcon.classList.toggle("fa-moon", !isDarkMode);
+});
+
+// Hide/show points section
+togglePointsButton.addEventListener("click", () => {
+  const isHidden = pointsSection.classList.contains("hidden");
+  pointsSection.classList.toggle("hidden", !isHidden);
+  toggleIcon.classList.toggle("fa-arrow-down", isHidden);
+  toggleIcon.classList.toggle("fa-arrow-up", !isHidden);
+  localStorage.setItem("pointsHidden", !isHidden);
+});
+
+// Copy with animation
+function copyToClipboard(inputId) {
+  const input = document.getElementById(inputId);
+  const value = input.value;
+  if (value) {
+    navigator.clipboard.writeText(value).then(() => {
+      const button = document.getElementById(`copy-${inputId}`);
+      button.classList.add("clicked");
+      setTimeout(() => {
+        button.classList.remove("clicked");
+      }, 300);
+    }).catch(err => {
+      console.error("Copy failed:", err);
+    });
   }
 }
 
-// Input listeners
-[entryPrice, slPoints, targetPoints, quantity].forEach(input => {
-  input.addEventListener('input', calculate);
-});
-
-// Restore saved values on page load
-window.addEventListener('DOMContentLoaded', () => {
-  if (localStorage.getItem('slPoints')) slPoints.value = localStorage.getItem('slPoints');
-  if (localStorage.getItem('targetPoints')) targetPoints.value = localStorage.getItem('targetPoints');
-  if (localStorage.getItem('quantity')) quantity.value = localStorage.getItem('quantity');
-  if (localStorage.getItem('mode') === 'dark') {
-    document.body.classList.add('dark');
-    modeToggle.textContent = '☀️';
-  }
-  calculate();
-});
-
-// Copy button logic
-document.querySelectorAll('.copy-btn').forEach(button => {
-  button.addEventListener('click', () => {
-    const input = document.getElementById(button.dataset.copyTarget);
-    navigator.clipboard.writeText(input.value);
-    button.textContent = '✅';
-    setTimeout(() => (button.textContent = '📋'), 1500);
-  });
-});
-
-// Dark mode toggle
-modeToggle.addEventListener('click', () => {
-  document.body.classList.toggle('dark');
-  const isDark = document.body.classList.contains('dark');
-  modeToggle.textContent = isDark ? '☀️' : '🌙';
-  localStorage.setItem('mode', isDark ? 'dark' : 'light');
-});
-// Toggle SL Points visibility
-const toggleSL = document.getElementById('toggleSL');
-toggleSL.addEventListener('click', () => {
-  if (slPoints.type === 'number') {
-    slPoints.type = 'password';
-    toggleSL.textContent = '👁️';
-  } else {
-    slPoints.type = 'number';
-    toggleSL.textContent = '🙈';
+// Add copy button listeners
+[
+  "strick",
+  "entryPrice",
+  "slPrice",
+  "targetPrice",
+  "tslPrice",
+  "tslTriggerPrice"
+].forEach(id => {
+  const button = document.getElementById(`copy-${id}`);
+  if (button) {
+    button.addEventListener("click", () => copyToClipboard(id));
   }
 });
 
-// Toggle Target Points visibility
-const toggleTarget = document.getElementById('toggleTarget');
-toggleTarget.addEventListener('click', () => {
-  if (targetPoints.type === 'number') {
-    targetPoints.type = 'password';
-    toggleTarget.textContent = '👁️';
-  } else {
-    targetPoints.type = 'number';
-    toggleTarget.textContent = '🙈';
-  }
-});
+// Load on open
+window.addEventListener("DOMContentLoaded", loadValues);
